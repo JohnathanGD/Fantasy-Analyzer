@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Team Page</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Style the header with a grey background and some padding */
+        .header {
+            
+            overflow: hidden;
+            background: linear-gradient(135deg, #1f1f1f, #292929);
+            padding: 20px 10px;
+            width: 100%;
+        }
+
+        /* Style the header links */
+        .header a {
+            float: left;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 25px;
+            border-radius: 4px;
+        }
+
+        /* Style the logo link (notice that we set the same value of line-height and font-size to prevent the header to increase when the font gets bigger */
+        .header h1.logo {
+            font-size: 40px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .header h1 {
+            float: left;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 25px;
+            border-radius: 4px;
+        }
+
+        /* Change the background color on mouse-over */
+        .header h1:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Float the link section to the right */
+        .header-right {
+            float: right;
+            gap: 20px; 
+        }
+
+        .button_header {
+            float: left;
+            color: #121212;
+            text-align: center;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 25px;
+            border-radius: 4px;
+            margin: 20px 20px;
+        }
+
+        button {
+            background-color: #f0ad4e;
+            color: #121212;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #ec971f;
+        }
+
+        @media screen and (max-width: 500px) {
+            .header h2 {
+                float: none;
+                display: block;
+                text-align: left;
+            }
+            .header-right {
+                float: none
+            }
+            .button_header {
+                line-height: normal;
+                margin: 10px 10px;
+            }
+        }
+        .scoreboard {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .team {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .team img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #f0ad4e;
+        }
+        .team h3 {
+            font-size: 2em;
+            line-height: 0.9;
+        }
+        .team h4 {
+            font-size: 1em;
+            color: lightgray;
+            line-height: 0.4;
+        }
+        .team-name {
+            flex-direction: column;
+            padding:0;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .button-group button {
+            flex: 1 1 calc(20% - 20px);
+            max-width: 250px;
+            padding: 15px;
+            font-size: 1em;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #f0ad4e, #e89a3d);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .button-group button:hover {
+            background: linear-gradient(135deg, #ec971f, #d27c2c);
+            transform: translateY(-5px);
+        }
+        .content-section {
+            display: none;
+            padding: 20px;
+            width: 100%;
+            max-width: 1100px;
+            margin: 20px auto;
+            background-color: #1f1f1f;
+            border-radius: 12px;
+        }
+        .content-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-radius: 12px;
+            max-width: 1100px;
+            margin: 20px auto;
+        }
+
+        .schedule {
+            flex: 1;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 20%;
+            margin-bottom: 20px;
+        }
+
+        .schedule img {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .schedule p {
+            color: lightgray;
+        }
+
+        .stats {
+            flex: 2;
+            display: flex;
+            flex-direction: column;  /* Stack containers vertically */
+            gap: 20px;
+        }
+
+        .stat-box {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .schedule h2 {
+            margin-top: 0;
+        }
+
+
+        .stats p {
+            font-size: 1em;
+        }
+
+        @media (max-width: 900px) {
+            .content-container {
+                flex-direction: column;
+            }
+        }
+        .active {
+            display: block;
+        }
+        @media (max-width: 1000px) {
+            .team {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .team img {
+                margin-bottom: 15px;
+            }
+            .button-group button {
+                flex: 1 1 100%;
+            }
+            .content-section {
+                width: 90%
+            }
+            .content-container {
+            flex-direction: column;
+            }
+            .schedule{
+                max-width: 100%;
+            }
+            .stats {
+                max-width: 100%;
+            }
+        }
+        .win {
+        color: green;
+        }
+
+        .loss {
+            color: red;
+        }
+        .neutral {
+            color: white;
+        }
+        table {
+            border: 1px solid #f0ad4e;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="logo">GAMETIME-STATS</h1>
+        <div class="header-right">
+          <button class="button_header" id="Enter" type="button" onclick="window.location.href = '/';">NFL Stats</button>
+          <button class="button_header">CFP Stats</button>
+          <button class="button_header">NBA Stats</button>
+        </div>
+      </div>
+
+<div class="scoreboard">
+    <div class="team">
+        <img src="{{ teams[3] }}" alt="{{ teams[2] }} Logo">
+        <div Class="team-name">
+            <h3>{{ teams[1] }}</h3>
+            {% for record in record %}
+                <h4>{{ record[1] }}</h4>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button onclick="showContent('stats')">Team Stats</button>
+        <button onclick="showContent('players')">Players</button>
+        <button onclick="showContent('news')">News</button>
+        <button onclick="showContent('schedule')">Schedule</button>
+        <button onclick="showContent('odds')">Player Projection/Odds</button>
+    </div>
+</div>
+
+<div id="stats" class="content-section active">
+    <h2> {{teams[1]}} Stats </h2>
+    <div class="content-container">
+        <div class="schedule">
+            <h2>Regular Season</h2>
+            {% if schedule %}
+                {% for game in schedule %}
+                    <p>
+                        vs. <img src="{{ game[10] }}" alt="team logo"> 
+                        <a href="/game/teams/{{ game[12]}}" style="text-decoration: none; color: inherit;">{{ game[6] }} </a> - 
+                        <strong class="{% if game[8] == 'W' %}win{% elif game[8] == 'L' %}loss{% else %}neutral{% endif %}">{{ game[8] }}</strong>    
+                        {{ game[5] }}-{{ game[7] }}
+                    </p>
+                {% endfor %}
+            {% else %}
+                <p>No schedule available.</p>
+            {% endif %}
+        </div>
+        <div class="stats">
+                <div class="stat-box">
+                    <h2>Team Stats</h2>
+                    <table style="width: 100%;" border="1">
+                        <thead>
+                            <tr>
+                                <td>PCT</td>
+                                <td>PTS/G</td>
+                                <td>OTPS/G</td>
+                                <td>PF</td>
+                                <td>PA</td>
+                                <td>DIFF</td>
+                                <td>DPCT</td>
+                                <td>GP</td>
+                                <td>STRK</td>
+                            </tr>
+                        </thead>
+                        {% for record in record %}
+                        <tbody>
+                            <tr>
+                                <td>{{ record[2] }}</td>
+                                <td>{{ record[3] }}</td>
+                                <td>{{ record[4] }}</td>
+                                <td>{{ record[5] }}</td>
+                                <td>{{ record[6] }}</td>
+                                <td>{{ record[7] }}</td>
+                                <td>{{ record[9] }}</td>
+                                <td>{{ record[10] }}</td>
+                                <td>{{ record[11] }}</td>
+                            </tr>
+                        </tbody>
+                        {% endfor %}
+                    </table>                 
+                </div>
+                <div class="stat-box">
+                    <h2>Team Leaders</h2>
+                    <p>Fumbles: 7</p>
+                    <p>Team Leaders: Player ABC</p>
+                    <p>Additional stats...</p>
+                </div>
+                <div class="stat-box">
+                    <h2>Team Stats</h2>
+                    <p>Fumbles: 3</p>
+                    <p>Team Leaders: Player DEF</p>
+                    <p>Additional stats...</p>
+                </div>
+            </div>
+        </div>
+</div>
+
+<div id="players" class="content-section">
+    <h2>Players</h2>
+    <p>Meet the players...</p>
+</div>
+
+<div id="news" class="content-section">
+    <h2>News</h2>
+    <p>Latest news about the team...</p>
+</div>
+
+<div id="schedule" class="content-section">
+    <h2>Schedule</h2>
+    <p>Check out the team's schedule...</p>
+</div>
+
+<div id="odds" class="content-section">
+    <h2>Player Projection/Odds</h2>
+    <p>Odds and projections for players...</p>
+</div>
+
+<script>
+    function showContent(sectionId) {
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+    }
+</script>
+
+</body>
+</html>
+
+
