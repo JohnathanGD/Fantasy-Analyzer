@@ -67,27 +67,6 @@ cursor.execute("""
 
 
 cursor.execute("""
-    CREATE TABLE IF NOT EXISTS players (
-        player_id TEXT PRIMARY KEY,
-        full_name TEXT,
-        position TEXT,
-        team_id TEXT,
-        headshot TEXT
-    );
-""")
-
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS player_stats (
-        player_id TEXT,
-        game_id TEXT,
-        stat_category TEXT,
-        stat_value TEXT,
-        FOREIGN KEY (player_id) REFERENCES players (player_id),
-        FOREIGN KEY (game_id) REFERENCES games (game_id)
-    );
-""")
-
-cursor.execute("""
     CREATE TABLE IF NOT EXISTS venues (
         venue_id TEXT PRIMARY KEY,
         full_name TEXT,
@@ -128,6 +107,35 @@ cursor.execute("""
     );
 
 """)
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS players (
+        player_id TEXT PRIMARY KEY,
+        full_name TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        jersey TEXT,
+        team_id TEXT,
+        FOREIGN KEY (team_id) REFERENCES teams (team_id)
+    );
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS player_stats (
+        stat_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_id TEXT,
+        game_id TEXT,
+        team_id TEXT,
+        category TEXT,
+        stat_key TEXT,
+        stat_value TEXT,
+        jersey TEXT,
+        FOREIGN KEY (player_id) REFERENCES players (player_id),
+        FOREIGN KEY (game_id) REFERENCES games (game_id),
+        FOREIGN KEY (team_id) REFERENCES teams (team_id)
+    );
+""")
+
 
 # New Odds Tables
 

@@ -25,7 +25,6 @@
             color: #ddd;
             margin: 5px 0 20px;
         }
-                /* Style the header with a grey background and some padding */
         .header {
         
             overflow: hidden;
@@ -34,7 +33,6 @@
             width: 100%;
         }
 
-        /* Style the header links */
         .header a {
             float: left;
             color: white;
@@ -46,7 +44,6 @@
             border-radius: 4px;
         }
 
-        /* Style the logo link (notice that we set the same value of line-height and font-size to prevent the header to increase when the font gets bigger */
         .header h1.logo {
             font-size: 40px;
             font-weight: bold;
@@ -64,13 +61,11 @@
             border-radius: 4px;
         }
 
-        /* Change the background color on mouse-over */
         .header h1:hover {
             background-color: #ddd;
             color: black;
         }
 
-        /* Float the link section to the right */
         .header-right {
             float: right;
             gap: 20px; 
@@ -101,14 +96,17 @@
                 line-height: normal;
                 margin: 10px 10px;
             }
+            .header {
+                width: auto;
+            }
         }
         .scoreboard {
             display: flex;
-            flex-direction: row;  /* Aligns cards in a row */
-            flex-wrap: wrap;  /* Allows wrapping to the next line if needed */
-            justify-content: center;  /* Centers the row of cards */
-            gap: 20px;  /* Adds space between cards */
-            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;  
+            justify-content: center; 
+            gap: 20px; 
+            width: fit-content;
             max-width: 1200px;
             margin: 30px auto;
         }
@@ -121,20 +119,20 @@
             border-radius: 12px;
             padding: 30px 50px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            max-width: 800px;
+            max-width: fit-content;
             margin: 30px auto;
         }
 
         .game-card-live {
             display: flex;
             justify-content: space-between;
-            width: 100%;
+            width: fit-content;
             gap: 40px;
         }
 
         .game-card {
-            width: calc(33.33% - 40px);  /* Makes three cards fit in one row with spacing */
-            max-width: 350px;
+            width: calc(33.33% - 40px);
+            max-width: fit-content;
             background: linear-gradient(135deg, #1f1f1f, #292929);
             border: 1px solid #444;
             border-radius: 12px;
@@ -164,7 +162,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            width: 100%;
+            width: fit-content;
             margin: 20px 0;
             padding: 15px;
             border-radius: 10px;
@@ -193,7 +191,7 @@
             flex-direction: row;
             justify-content: center;
             gap: 20px;
-            width: 100%;
+            width: fit-content;
         }
 
         .team-live p {
@@ -226,6 +224,22 @@
             border-radius: 50%;
             border: 2px solid #f0ad4e;
             margin-right: 20px;
+        }
+
+        .boxscore {
+            display: flex;
+            max-width: fit-content;
+            background: linear-gradient(135deg, #1f1f1f, #292929);
+            border: 1px solid #444;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
 
         .odds-section {
@@ -278,13 +292,16 @@
         button:hover {
             background-color: #ec971f;
         }
+        .button-box {
+            justify-content: center;
+        }
         a {
             font-size: 2em;
         }
 
         @media (max-width: 800px) {
             .game-card {
-                width: calc(50% - 40px);  /* Two cards per row */
+                width: calc(50% - 40px);
             }
             .team {
                 width: fit-content;
@@ -298,18 +315,80 @@
             p {
                 font-size: 1em;
             }
+            .boxscore {
+                max-width: 400px;
+            }
+            .livegamecard {
+                max-width: fit-content;
+            }
+            .game-card-live {
+                max-width: fit-content;
+                width:fit-content
+            }
+            .team-live {
+                max-width: fit-content;
+                width:fit-content
+            }
+            .team-live a {
+                font-size: 0.75em;
+            }
+            .team-live-display {
+                max-width: fit-content;
+                width: 10%
+            }
+            .team-live-display img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #f0ad4e;
+            margin-right: 20px;
+            }
+            .header {
+                width: auto;
+            }
             
         }
 
         @media (max-width: 600px) {
             .game-card {
-                width: calc(100% - 40px);  /* One card per row */
+                width: calc(100% - 40px); 
             }
             h1 {
                 font-size: 1em;
             }
             p {
                 font-size: 1em;
+            }
+            .boxscore {
+                max-width: fit-content;
+            }
+            .livegamecard {
+                max-width: fit-content;
+            }
+            .game-card-live {
+                max-width: fit-content;
+                width:fit-content
+            }
+            .team-live {
+                max-width: fit-content;
+                width:fit-content
+            }
+            .team-live a {
+                font-size: 0.5em;
+            }
+            .team-live-display {
+                max-width: fit-content;
+                width: 10%
+            }
+            .team-live-display img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #f0ad4e;
+            margin-right: 20px;
+            }
+            .header {
+                width: auto;
             }
         }
     </style>
@@ -349,6 +428,51 @@
       <p>Down: <span style="color:#f0ad4e;">{{ game[4] }} </span></p>
       <p>Last Play: <span style="color:#f0ad4e;">{{ game[5] }} </span></p>
 
+      <div class="boxscore">
+        <h2>BoxScore</h2>
+        <div>
+        {% for team in teams %}
+            <form action="{{ url_for('display_game_info', game_id=game[0]) }}" method="get" style="display:inline;">
+                <input type="hidden" name="team_id" value="{{ team[4] }}">
+                <button type="submit" {% if team[4] == selected_team_id|int %}style="background-color: lightgray;"{% endif %}>
+                    {{ team[0] }}
+                </button>
+            </form>
+        {% endfor %}
+        </div>
+      
+        {% if stats_by_team %}
+            {% set selected_team_name = stats_by_team.keys() | list | first %}
+            <h3>{{ selected_team_name }}</h3>
+            {% for category, players in stats_by_team[selected_team_name].items() %}
+                <h4>{{ category.capitalize() }}</h4>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            {% set first_player = players.values() | first %}
+                            {% for stat_key in first_player.keys() %}
+                                <th>{{ stat_key.replace('_', ' ').capitalize() }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player, stats in players.items() %}
+                            <tr>
+                                <td>{{ player }}</td>
+                                {% for stat_value in stats.values() %}
+                                    <td>{{ stat_value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No player statistics available for this game.</p>
+        {% endif %}
+    </div>
+      
 
     {% if odds %}
         <div class="odds-section">

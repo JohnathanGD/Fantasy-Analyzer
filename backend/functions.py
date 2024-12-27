@@ -7,32 +7,6 @@ import backend.config as config
 def get_database():
     return sqlite3.connect(config.DATABASE)
 
-def fetch_and_store_data_for_week():
-    response = requests.get(config.API_URL_WEEK)
-    if response.status_code == 200:
-        week_data = response.json()
-        conn = get_database()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT OR REPLACE INTO nflWeek (
-                    week,
-                    season_type,
-                    season_start_date,
-                    season,
-                    display_week 
-            ) VALUES (?, ?, ?, ?, ?)
-        """, (
-            week_data.get('week'),
-            week_data.get('season_type'),
-            week_data.get('season_start_date'),
-            week_data.get('season'),
-            week_data.get('display_week')
-        ))
-
-
-        conn.commit()
-        conn.close()
 
 def fetch_and_store_odds(url):
     response = requests.get(url)
@@ -237,7 +211,6 @@ def fetch_and_store_competition_results(url):
             team1_score = int(team1['score']['value']) if 'score' in team1 and 'value' in team1['score'] else 0
             team2_score = int(team2['score']['value']) if 'score' in team2 and 'value' in team2['score'] else 0
             
-            # Infer outcome by comparing scores
             if team1_score == 0 and team2_score == 0:
                 team1_outcome = 'Pending'
                 team2_outcome = 'Pending'
@@ -245,28 +218,24 @@ def fetch_and_store_competition_results(url):
                 team1_outcome = 'W' if team1_score > team2_score else 'L'
                 team2_outcome = 'W' if team2_score > team1_score else 'L'
 
-            # Insert into games table
             cursor.execute('''
                 INSERT OR REPLACE INTO games (
                     game_id, name, date, week, status
                 ) VALUES (?, ?, ?, ?, ?)
             ''', (game_id, name, date, week, "Scheduled"))
 
-            # Insert for team 1
             cursor.execute('''
                 INSERT OR REPLACE INTO teams (
                     team_id, game_id, team_name, score, abbreviation, logo
                 ) VALUES (?, ?, ?, ?, ?, ?)
             ''', (team1_id, game_id, team1_name, team1_score, team1['team']['abbreviation'], team1_logo))
 
-            # Insert for team 2
             cursor.execute('''
                 INSERT OR REPLACE INTO teams (
                     team_id, game_id, team_name, score, abbreviation, logo
                 ) VALUES (?, ?, ?, ?, ?, ?)
             ''', (team2_id, game_id, team2_name, team2_score, team2['team']['abbreviation'], team2_logo))
 
-            # Insert into competition_results (Team 1 perspective)
             cursor.execute('''
                 INSERT OR REPLACE INTO competition_results (
                     game_id, week, competition_date, team_id, team_name, team_logo,
@@ -275,7 +244,6 @@ def fetch_and_store_competition_results(url):
             ''', (game_id, week, date, team1_id, team1_name, team1_logo,
                   team2_id, team2_name, team2_logo, team1_score, team2_score, team1_outcome))
 
-            # Insert into competition_results (Team 2 perspective)
             cursor.execute('''
                 INSERT OR REPLACE INTO competition_results (
                     game_id, week, competition_date, team_id, team_name, team_logo,
@@ -293,13 +261,11 @@ def fetch_and_store_team_records(url, team_id):
         espn_data = response.json()
         items = espn_data.get('items', [])
         
-        # Find the "total" record
         total_record = next((item for item in items if item['type'] == 'total'), None)
         if total_record:
             summary = total_record.get('summary')
             stats = {stat['name']: stat['value'] for stat in total_record.get('stats', [])}
             
-            # Extract required stats
             overall_record = summary
             win_percentage = stats.get('winPercent')
             avg_points_for = stats.get('avgPointsFor')
@@ -313,8 +279,6 @@ def fetch_and_store_team_records(url, team_id):
             playoff_seed = stats.get('playoffSeed')
             streak = stats.get('streak')
             
-
-            # Store data in the database
             conn = get_database()
             cursor = conn.cursor()
             cursor.execute("""
@@ -333,78 +297,53 @@ def fetch_and_store_team_records(url, team_id):
 
 def fetch_and_store_boxscore(url):
     response = requests.get(url)
-    
+
     if response.status_code == 200:
         espn_data = response.json()
-        boxscore = espn_data.get('boxscore', {})
+
+        boxscore = espn_data.get('gamepackageJSON', {})
+        boxscore = boxscore.get('boxscore', [])
         teams = boxscore.get('teams', [])
         players = boxscore.get('players', [])
+        game_data = espn_data.get('gamepackageJSON', {}).get('game', {})
+        boxscore_id = game_data.get('id', None)
 
-        conn = sqlite3.connect(DATABASE)
+        if boxscore_id is None:
+            from urllib.parse import urlparse, parse_qs
+            parsed_url = urlparse(url)
+            boxscore_id = parse_qs(parsed_url.query).get('gameId', [None])[0]
+
+
+        conn = get_database()
         cursor = conn.cursor()
 
         for team in teams:
             team_id = team['team']['id']
-            team_name = team['team']['displayName']
-            abbreviation = team['team']['abbreviation']
-            home_away = team['homeAway']
 
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO teams (team_id, team_name, abbreviation, home_away)
-                VALUES (?, ?, ?, ?)
-                """,
-                (team_id, team_name, abbreviation, home_away)
-            )
+            for player_group in players:
+                if player_group['team']['id'] == team_id:
+                    for category in player_group['statistics']:
+                        category_name = category['name']
+                        keys = category['labels']
 
-            # Extract team statistics
-            for stat in team['statistics']:
-                stat_name = stat['name']
-                stat_value = stat['displayValue']
-                cursor.execute(
-                    """
-                    INSERT INTO records (team_id, record, win_percentage)
-                    VALUES (?, ?, ?)
-                    ON CONFLICT(team_id) DO UPDATE SET record=excluded.record, win_percentage=excluded.win_percentage
-                    """,
-                    (team_id, stat_name, stat_value)
-                )
+                        for athlete in category['athletes']:
+                            player = athlete['athlete']
+                            player_name = player['displayName']
+                            player_id = player['id']
+                            stats = athlete['stats']
+                            jersey = player.get('jersey', "")
 
-        for player_group in players:
-            team_id = player_group['team']['id']
-            for category in player_group['statistics']:
-                for athlete in category['athletes']:
-                    player_id = athlete['athlete']['id']
-                    full_name = athlete['athlete']['displayName']
-                    position = category['name']
-                    jersey = athlete['athlete'].get('jersey', "")
-                    
-                    cursor.execute(
-                        """
-                        INSERT OR REPLACE INTO players (player_id, full_name, position, team_id)
-                        VALUES (?, ?, ?, ?)
-                        """,
-                        (player_id, full_name, position, team_id)
-                    )
+                            cursor.execute("""
+                                INSERT OR IGNORE INTO players (player_id, full_name, first_name, last_name, jersey, team_id)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            """, (player_id, player_name, player['firstName'], player['lastName'], jersey, team_id))
 
-                    for i, key in enumerate(category['keys']):
-                        stat_value = athlete['stats'][i]
-                        cursor.execute(
-                            """
-                            INSERT INTO player_stats (player_id, stat_category, stat_value)
-                            VALUES (?, ?, ?)
-                            """,
-                            (player_id, key, stat_value)
-                        )
+                            for key, value in zip(keys, stats):
+                                cursor.execute("""
+                                    INSERT INTO player_stats (player_id, game_id, team_id, category, stat_key, stat_value, jersey)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                                    ON CONFLICT(stat_id) DO UPDATE SET stat_value = excluded.stat_value
+                                """, (player_id, boxscore_id, team_id, category_name, key, value, jersey))
 
-                        # Insert into boxscore_data table
-                        cursor.execute(
-                            """
-                            INSERT OR REPLACE INTO boxscore_data (team_id, team_name, abbreviation, home_away, player_id, full_name, position, stat_category, stat_value)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            """,
-                            (team_id, team_name, abbreviation, home_away, player_id, full_name, position, key, stat_value)
-                        )
-        
         conn.commit()
         conn.close()
