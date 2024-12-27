@@ -5,7 +5,6 @@ DATABASE = 'database/db_fantasy.db'
 conn = sqlite3.connect(DATABASE)
 cursor = conn.cursor()
 
-# Existing Tables
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS nflWeek (
         week INTEGER PRIMARY KEY,
@@ -137,9 +136,6 @@ cursor.execute("""
 """)
 
 
-# New Odds Tables
-
-# 1. Odds Table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS odds (
         odds_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,7 +167,6 @@ cursor.execute("""
             );
 """)
 
-# 2. Odds Provider Table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS odds_provider (
         provider_id TEXT PRIMARY KEY,
@@ -180,7 +175,6 @@ cursor.execute("""
     );
 """)
 
-# 3. Team Odds Table (Home/Away Specific Odds)
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS team_odds (
         team_odds_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -198,7 +192,6 @@ cursor.execute("""
     );
 """)
 
-# 4. Odds Details Table (Over/Under/Total)
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS odds_details (
         odds_detail_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -215,7 +208,6 @@ cursor.execute("""
     );
 """)
 
-# 5. Odds Links Table
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS odds_links (
         link_id INTEGER PRIMARY KEY AUTOINCREMENT,
