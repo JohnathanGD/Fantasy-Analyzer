@@ -347,3 +347,5 @@ def fetch_and_store_boxscore(url):
 
         conn.commit()
         conn.close()
+
+        #test
