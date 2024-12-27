@@ -27,6 +27,7 @@ def home():
             teams_by_game[game_id] = []
         teams_by_game[game_id].append(team)
 
+
     combined_games = []
     for game in filtered_games:
         game_id, name, status, clock, period, week, down, detailed_text, date = game
@@ -83,12 +84,12 @@ def display_game_info(game_id):
         JOIN players p ON ps.player_id = p.player_id
         JOIN teams t ON ps.team_id = t.team_id
         WHERE ps.game_id = ? AND t.team_id = ?
-        ORDER BY t.team_name, ps.category, p.full_name
     ''', (game_id, team_id))
 
     player_stats = cursor.fetchall()
 
     stats_by_team = {}
+
     for player, category, stat_key, stat_value, team in player_stats:
         if team not in stats_by_team:
             stats_by_team[team] = {}
@@ -96,7 +97,16 @@ def display_game_info(game_id):
             stats_by_team[team][category] = {}
         if player not in stats_by_team[team][category]:
             stats_by_team[team][category][player] = {}
+        
         stats_by_team[team][category][player][stat_key] = stat_value
+
+    for team, categories in stats_by_team.items():
+        for category, players in categories.items():
+            sorted_players = dict(
+                sorted(players.items(), key=lambda x: x[1].get('yds', 0), reverse=True)
+            )
+            stats_by_team[team][category] = sorted_players
+
 
     conn.close()
 

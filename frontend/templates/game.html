@@ -298,6 +298,10 @@
         a {
             font-size: 2em;
         }
+        table {
+            border: 1px solid #f0ad4e;
+            border-collapse: collapse;
+        }
 
         @media (max-width: 800px) {
             .game-card {
@@ -442,36 +446,43 @@
         </div>
       
         {% if stats_by_team %}
-            {% set selected_team_name = stats_by_team.keys() | list | first %}
-            <h3>{{ selected_team_name }}</h3>
-            {% for category, players in stats_by_team[selected_team_name].items() %}
-                <h4>{{ category.capitalize() }}</h4>
-                <table border="1">
-                    <thead>
+        {% set selected_team_name = stats_by_team.keys() | list | first %}
+        <h3>{{ selected_team_name }}</h3>
+        {% for category, players in stats_by_team[selected_team_name].items() %}
+            <h4>{{ category.capitalize() }}</h4>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        {% set all_stat_keys = [] %}
+                        {% for stats in players.values() %}
+                            {% for stat_key in stats.keys() %}
+                                {% if stat_key not in all_stat_keys %}
+                                    {% set _ = all_stat_keys.append(stat_key) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {% for stat_key in all_stat_keys %}
+                            <th>{{ stat_key.replace('_', ' ').capitalize() }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player, stats in players.items() %}
                         <tr>
-                            <th>Player</th>
-                            {% set first_player = players.values() | first %}
-                            {% for stat_key in first_player.keys() %}
-                                <th>{{ stat_key.replace('_', ' ').capitalize() }}</th>
+                            <td>{{ player }}</td>
+                            {% for stat_key in all_stat_keys %}
+                                <td>{{ stats.get(stat_key, 'N/A') }}</td>
                             {% endfor %}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for player, stats in players.items() %}
-                            <tr>
-                                <td>{{ player }}</td>
-                                {% for stat_value in stats.values() %}
-                                    <td>{{ stat_value }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endfor %}
-        {% else %}
-            <p>No player statistics available for this game.</p>
-        {% endif %}
-    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% else %}
+        <p>No player statistics available for this game.</p>
+    {% endif %}
+    
       
 
     {% if odds %}

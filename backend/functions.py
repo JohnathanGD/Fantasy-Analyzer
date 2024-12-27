@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import sqlite3
 import requests
 import json
@@ -136,6 +138,8 @@ def fetch_and_store_live_data():
             game_id = event['id']
             name = event['name']
             date = event['date']
+            date = date.replace('Z', '+0000')
+            date = datetime.strptime(date, '%Y-%m-%dT%H:%M%z').astimezone(ZoneInfo('America/New_York')).strftime('%m/%d/%Y @ %I:%M %p')
             week = event['week']['number']
             down = event['competitions'][0].get('situation', {}).get('downDistanceText', 'No play')
             detailed_text = event['competitions'][0].get('situation', {}).get('lastPlay', {}).get('text', 'No play description available')

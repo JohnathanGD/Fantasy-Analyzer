@@ -151,6 +151,10 @@
             font-size: 1.3em;
             margin-right: auto;
         }
+        a {
+            font-size: 1em;
+            margin-right: auto;
+        }
         .game-status {
             font-size: 1.2em;
             margin-top: 10px;
@@ -223,17 +227,17 @@
             <div class="team-info">
                 <div class="team">
                     <img src="{{ game[8] }}" alt="{{ game[5] }} Logo">
-                    <div class="team-abbreviation">{{ game[5] }}</div>
+                    <a href="/game/teams/{{game[4]}}" style="text-decoration: none; color: inherit;"><div class="team-abbreviation">{{ game[5] }}</div></a>
                     <div class="team-score">{{ game[6] }}</div>
                 </div>
                 <div class="team">
                     <img src="{{ game[13] }}" alt="{{ game[10] }} Logo">
-                    <div class="team-abbreviation">{{ game[10] }}</div>
+                    <a href="/game/teams/{{game[9]}}" style="text-decoration: none; color: inherit;"><div class="team-abbreviation">{{ game[10] }}</div></a>
                     <div class="team-score">{{ game[11] }}</div>
                 </div>
             </div>
             <div class="game-status">
-                <div >{{ game[2] if game[2] != 'Scheduled' else game[2] ~ ' - ' ~ game[18] }}</div>
+                <div >{{ game[2] if game[2] != 'Scheduled' else game[2] ~ ' ' ~ game[18] }}</div>
                 <div>{{ game[3] }}</div>
                 <div>Quarter {{ game[14] }}</div>
             </div>
