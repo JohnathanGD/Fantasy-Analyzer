@@ -138,6 +138,19 @@
             flex-direction: column;
             padding:0;
         }
+        .player-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 10px 0;
+        }
+
+        .player-card {
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
         .button-group {
             display: flex;
             justify-content: center;
@@ -372,7 +385,23 @@
 
 <div id="players" class="content-section">
     <h2>Players</h2>
-    <p>Meet the players...</p>
+    <h2>{{ teams[1] }} Depth Chart</h2>
+    
+    {% for category, positions in depth_chart_grouped.items() %}
+        <h2>{{ category }}</h2>
+        {% for position, players in positions.items() %}
+            <h3>{{ position }}:</h3>
+            <div class="player-row">
+                {% for player in players %}
+                    <div class="player-card">
+                        <span>{{ player[3] }} - {{ player[4] }} ({{ player[7] }})</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+
 </div>
 
 <div id="news" class="content-section">

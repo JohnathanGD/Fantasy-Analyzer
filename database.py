@@ -6,6 +6,17 @@ conn = sqlite3.connect(DATABASE)
 cursor = conn.cursor()
 
 cursor.execute("""
+    CREATE TABLE IF NOT EXISTS leagueInfo (
+        id TEXT PRIMARY KEY,
+        year TEXT,
+        startdate TEXT,
+        enddate TEXT,
+        type TEXT,
+        name TEXT
+    );
+""")
+
+cursor.execute("""
     CREATE TABLE IF NOT EXISTS nflWeek (
         week INTEGER PRIMARY KEY,
         season_type TEXT,
@@ -20,6 +31,8 @@ cursor.execute("""
         game_id TEXT PRIMARY KEY,
         name TEXT,
         date TEXT,
+        year TEXT,
+        season_id TEXT,
         week INTEGER,
         venue_id TEXT,
         status TEXT,
@@ -116,6 +129,39 @@ cursor.execute("""
         jersey TEXT,
         team_id TEXT,
         FOREIGN KEY (team_id) REFERENCES teams (team_id)
+    );
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS depthChart (
+            team_id TEXT,
+            position_category TEXT,
+            position_abbreviation TEXT,
+            slot TEXT,
+            rank TEXT,
+            athlete_url TEXT
+    )
+               
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS athletes (
+               team_id TEXT,
+               player_name TEXT,
+               shortName TEXT,
+               weight TEXT,
+               height TEXT,
+               age TEXT,
+               dob TEXT,
+               slug TEXT,
+               headshot TEXT,
+               jersey TEXT,
+               position_name TEXT,
+               position_abv TEXT,
+               statistics_url TEXT,
+               projections_url TEXT,
+               player_status TEXT,
+               athlete_url TEXT
     );
 """)
 

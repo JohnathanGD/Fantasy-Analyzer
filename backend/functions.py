@@ -5,6 +5,8 @@ import sqlite3
 import requests
 import json
 import backend.config as config
+import asyncio
+import aiohttp
 
 def get_database():
     return sqlite3.connect(config.DATABASE)
@@ -116,11 +118,10 @@ def fetch_and_store_odds(url):
                     point_spread
                 ))
 
-        conn.commit()
-
         cursor.execute("SELECT * FROM team_odds WHERE game_id = ?", (game_id,))
         stored_team_odds = cursor.fetchall()
 
+        conn.commit()
         conn.close()
     else:
         print("Failed to fetch odds from API.")
@@ -130,12 +131,28 @@ def fetch_and_store_live_data():
     if response.status_code == 200:
         espn_data = response.json()
         events = espn_data.get('events', [])
+        leagues = espn_data.get('leagues', [])
         
         conn = get_database()
         cursor = conn.cursor()
+
+        for league in leagues :
+            league_id = league['id']
+            league_year = league['season']['year']
+            start_date = league['season']['startDate']
+            end_date = league['season']['endDate']
+            league_type = league['season']['type']['type']
+            league_name = league['season']['type']['name']
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO leagueInfo (id, year, startdate, enddate, type, name)
+                           VALUES(?,?,?,?,?,?)
+            """, (league_id, league_year, start_date, end_date, league_type, league_name))
         
         for event in events:
             game_id = event['id']
+            year = event['season']['year']
+            season_id = event['season']['type']
             name = event['name']
             date = event['date']
             date = date.replace('Z', '+0000')
@@ -154,9 +171,9 @@ def fetch_and_store_live_data():
             indoor = venue['indoor']
 
             cursor.execute('''
-                INSERT OR REPLACE INTO games (game_id, name, date, week, venue_id, status, clock, period, down, detailed_text)
-                VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)
-            ''', (game_id, name, date, week, venue_id, status, clock, period, down, detailed_text))
+                INSERT OR REPLACE INTO games (game_id, name, date, week, venue_id, status, clock, period, down, detailed_text, year, season_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)
+            ''', (game_id, name, date, week, venue_id, status, clock, period, down, detailed_text, year, season_id))
 
             cursor.execute('''
                 INSERT OR REPLACE INTO venues (venue_id, full_name, city, state, indoor)
@@ -181,10 +198,83 @@ def fetch_and_store_live_data():
         conn.commit()
         conn.close()
 
-def fetch_and_store_data_for_depthChart():
-    response = requests.get(config.API_URL_PLAYERS)
+def fetch_and_store_data_for_depthChart(url, team_id):
+    response = requests.get(url)
     if response.status_code == 200:
-        player_data = response.json()
+        espn_data = response.json()
+        items = espn_data.get('items', [])
+        data_to_insert = []
+
+        with get_database() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM depthChart WHERE team_id = ?", (team_id,))
+            
+            for item in items:
+                position_category = item['name']
+                positions = item.get('positions', {})
+
+                for value in positions.values():
+                    abbreviation = value['position']['abbreviation']
+                    athletes_info = value.get('athletes', [])
+
+                    for athlete in athletes_info:
+                        slot = athlete['slot']
+                        rank = athlete['rank']
+                        athlete_url = athlete.get('athlete', {}).get('$ref', None)
+                        athlete_url = athlete_url.rstrip('/') if athlete_url else None
+                        
+                        data_to_insert.append((team_id, position_category, abbreviation, slot, rank, athlete_url))
+
+            cursor.executemany("""
+                INSERT INTO depthChart (team_id, position_category, position_abbreviation, slot, rank, athlete_url)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, data_to_insert)
+            conn.commit()
+
+
+async def fetch_player_data(session, url):
+    async with session.get(url) as response:
+        return await response.json(), url
+
+
+async def fetch_and_store_player_data_async(urls, team_id):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_player_data(session, url) for url in urls]
+        results = await asyncio.gather(*tasks)
+
+        with get_database() as conn:
+            cursor = conn.cursor()
+            for espn_data, url in results:
+                if espn_data:
+                    player_full_name = espn_data['fullName']
+                    shortName = espn_data.get('shortName', player_full_name)
+                    weight = espn_data.get('displayWeight', 'N/A')
+                    height = espn_data.get('displayHeight', 'N/A')
+                    age = espn_data.get('age', None)
+                    dob = espn_data['dateOfBirth']
+                    dob = dob.replace('Z', '+0000')
+                    dob = datetime.strptime(dob, '%Y-%m-%dT%H:%M%z').astimezone(ZoneInfo('America/New_York')).strftime('%m/%d/%Y')
+                    slug = espn_data.get('slug', 'N/A')
+                    headshot = espn_data.get('headshot', {}).get('href', None)
+                    jersey = espn_data.get('jersey', "N/A")
+                    position = espn_data.get('position', {})
+                    position_name = position.get('displayName', 'N/A')
+                    position_abv = position.get('abbreviation', 'N/A')
+                    statistics_url = espn_data.get('statistics', {}).get('$ref', None)
+                    projections_url = espn_data.get('projections', {}).get('$ref', None)
+                    player_status = espn_data.get('status', {}).get('type', {})
+                    athlete_url = url
+
+                    cursor.execute("""
+                        INSERT OR REPLACE INTO athletes (
+                            team_id, player_name, shortName, weight, height, age, dob, slug, headshot, jersey,
+                            position_name, position_abv, athlete_url, statistics_url, projections_url, player_status
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (team_id, player_full_name, shortName, weight, height, age, dob, slug, headshot, jersey,
+                          position_name, position_abv, athlete_url, statistics_url, projections_url, player_status))
+            conn.commit()
+
+
 
 def fetch_and_store_competition_results(url):
     response = requests.get(url)
@@ -316,7 +406,6 @@ def fetch_and_store_boxscore(url):
             from urllib.parse import urlparse, parse_qs
             parsed_url = urlparse(url)
             boxscore_id = parse_qs(parsed_url.query).get('gameId', [None])[0]
-
 
         conn = get_database()
         cursor = conn.cursor()

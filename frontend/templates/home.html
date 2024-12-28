@@ -244,6 +244,7 @@
             <div>{{ game[16] }}</div>
             <form method="POST" action="/game/{{game[0]}}">
                 <input type="hidden" name="game_id" value="{{ game[0] }}">
+                <input type="hidden" name="year" value="{{game[18]}}">
                 <button type="submit">View Game Details</button>
             </form>
         </div>
