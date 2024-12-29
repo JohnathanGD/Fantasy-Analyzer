@@ -214,7 +214,7 @@ def display_team_info(team_id):
     deduped_depth_chart = []
 
     for row in depth_chart:
-        if (row[1], row[3]) not in unique_players:  # Unique by position and rank
+        if (row[1], row[3]) not in unique_players:
             deduped_depth_chart.append(row)
             unique_players.add((row[1], row[3]))
 
