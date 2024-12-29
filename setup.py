@@ -1,5 +1,6 @@
 import os
 import subprocess
+from subprocess import call
 import sqlite3
 import sys
 from backend import functions, config
@@ -26,7 +27,8 @@ else:
 DB_FILE = config.DATABASE
 
 if not os.path.exists(DB_FILE):
-    print("Database file not found. Please ensure db_fantasy.db is in the backend folder.")
+    print("Initializing database...")
+    call(['python', 'database.py'])
 else:
     print("Database found. Proceeding with initialization.")
 
