@@ -251,9 +251,17 @@ async def fetch_and_store_player_data_async(urls, team_id):
                     weight = espn_data.get('displayWeight', 'N/A')
                     height = espn_data.get('displayHeight', 'N/A')
                     age = espn_data.get('age', None)
-                    dob = espn_data['dateOfBirth']
-                    dob = dob.replace('Z', '+0000')
-                    dob = datetime.strptime(dob, '%Y-%m-%dT%H:%M%z').astimezone(ZoneInfo('America/New_York')).strftime('%m/%d/%Y')
+                    dob = espn_data.get('dateOfBirth', None)
+
+                    if dob:
+                        dob = dob.replace('Z', '+0000')
+                        try:
+                            dob = datetime.strptime(dob, '%Y-%m-%dT%H:%M%z')
+                        except ValueError:
+                            dob = None 
+                    else:
+                        dob = None
+
                     slug = espn_data.get('slug', 'N/A')
                     headshot = espn_data.get('headshot', {}).get('href', None)
                     jersey = espn_data.get('jersey', "N/A")
@@ -264,15 +272,19 @@ async def fetch_and_store_player_data_async(urls, team_id):
                     projections_url = espn_data.get('projections', {}).get('$ref', None)
                     player_status = espn_data.get('status', {}).get('type', {})
                     athlete_url = url
+                    athlete_id = espn_data.get('id', 'N/A')
 
                     cursor.execute("""
                         INSERT OR REPLACE INTO athletes (
                             team_id, player_name, shortName, weight, height, age, dob, slug, headshot, jersey,
-                            position_name, position_abv, athlete_url, statistics_url, projections_url, player_status
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            position_name, position_abv, athlete_url, statistics_url, projections_url, player_status, athlete_id
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (team_id, player_full_name, shortName, weight, height, age, dob, slug, headshot, jersey,
-                          position_name, position_abv, athlete_url, statistics_url, projections_url, player_status))
+                          position_name, position_abv, athlete_url, statistics_url, projections_url, player_status, athlete_id))
             conn.commit()
+
+def fetch_and_store_athlete(url):
+    response = requests.get(url)
 
 
 

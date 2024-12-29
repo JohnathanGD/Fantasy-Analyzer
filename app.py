@@ -192,13 +192,17 @@ def display_team_info(team_id):
                 a.jersey,
                 a.headshot,
                 a.position_name,
-                a.position_abv
+                a.position_abv,
+                a.slug,
+                a.shortName,
+                a.athlete_id,
+                a.team_id
             FROM depthChart d
             LEFT JOIN athletes a 
                 ON d.athlete_url = a.athlete_url
                 AND d.team_id = a.team_id
             WHERE d.team_id = ?
-            ORDER BY d.position_category, d.rank ASC
+            ORDER BY a.position_name DESC, d.position_category, d.rank ASC
         ''', (team_id,))
 
         depth_chart = cursor.fetchall()
@@ -231,6 +235,23 @@ def display_team_info(team_id):
         depth_chart_grouped=depth_chart_grouped
     )
 
+@app.route('/game/teams/<team_id>/player/<slug>/<athlete_id>')
+def display_player_info(team_id, slug, athlete_id):
+
+    with functions.get_database() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT team_id, team_name, abbreviation, logo FROM teams WHERE team_id = ?', (team_id,))
+        teams = cursor.fetchone()
+
+        cursor.execute('SELECT athlete_id, player_name, weight, height, age, dob, headshot, jersey, position_abv, statistics_url, projections_url, player_status FROM athletes WHERE slug = ?', (slug,))
+        athletes = cursor.fetchone()
+    
+
+    return render_template('player_info.html',
+                           athletes=athletes
+                           
+                           )
 
 
 if __name__ == '__main__':

@@ -161,7 +161,8 @@ cursor.execute("""
                statistics_url TEXT,
                projections_url TEXT,
                player_status TEXT,
-               athlete_url TEXT
+               athlete_url TEXT,
+               athlete_id TEXT
     );
 """)
 
