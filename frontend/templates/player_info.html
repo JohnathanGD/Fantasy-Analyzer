@@ -185,7 +185,7 @@
             margin: 30px 0;
         }
         .button-group button {
-            flex: 1 1 calc(20% - 20px);
+            flex: 1 1 calc(10% - 10px);
             max-width: 250px;
             padding: 15px;
             font-size: 1em;
@@ -309,8 +309,27 @@
             color: white;
         }
         table {
-            border: 1px solid #f0ad4e;
-            border-collapse: collapse;
+        width: 100%;
+        border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        td {
+            background-color: #1a1a1a;
+        }
+        .split-category {
+            margin-bottom: 20px;
+        }
+        h2 {
+            text-transform: uppercase;
+            color: #ffbf00;
         }
     </style>
 </head>
@@ -342,6 +361,7 @@
 
     <div class="button-group">
         <button onclick="showContent('stats')">Player Overview</button>
+        <button onclick="showContent('player_projections/stats')">Player Stats/Projections</button>
         <button onclick="showContent('splits')">Player Splits</button>
         <button onclick="showContent('news')">Player News</button>
         <button onclick="showContent('game_log')">Game Log</button>
@@ -350,11 +370,91 @@
 </div>
 
 <div id="stats" class="content-section active">
-
+    
 </div>
 
+<div id="player_projections/stats" class="content-section">
+    <h1>Projections</h1>
+        {% if projections %}
+        {% for category, category_data in projections.items() %}
+        <div class="split-category">
+            <h2>{{ category }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stat</th>
+                        <th>Value</th>
+                        <th>Rank</th>
+                        <th>Desc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat, stat_data in category_data.items() %}
+                        {% for projection_desc, projection_values in stat_data.items() %}
+                            {% for abbr, details in projection_values.items() %}
+                            <tr>
+                                <td>{{ abbr }}</td>
+                                <td>{{ details.value }}</td>
+                                <td>{{ details.rank_display|default('N/A') }}</td>
+                                <td>{{ projection_desc }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+{% else %}
+    <p>There are no player splits for this player...</p>
+{% endif %}
+</div>
+
+
+
+
 <div id="splits" class="content-section">
-    <h2>Players</h2>
+    {% if splits %}
+    {% for category, category_data in splits.items() %}
+    <div class="split-category">
+        <h2>{{ category }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stat</th>
+                    {% if category_data.values()|first %}
+                        {% for stat_key in category_data.values()|first %}
+                            <th>{{ stat_key }}</th>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat, stat_data in category_data.items() %}
+                <tr>
+                    <td>{{ stat }}</td>
+                    {% for value in stat_data.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No splits available for this player.</p>
+{% endif %}
+
+    <h1>Glossary: </h1>
+    <h2>Recieving: </h2>
+    <p>REC - <p1 style='font-size: 0.75em;'>Total receptions </p1></p>
+    <p>YDS - <p1 style='font-size: 0.75em;'>Total Recieving yards </p1></p>
+    <p>AVG - <p1 style='font-size: 0.75em;'>Average yards per reception </p1></p>
+    <p>LNG - <p1 style='font-size: 0.75em;'>Longest reception </p1></p>
+    <p>TD - <p1 style='font-size: 0.75em;'>Receiving touchdowns </p1></p>
+    <p>FUM - <p1 style='font-size: 0.75em;'>Total fumbles </p1></p>
+    <p>LST - <p1 style='font-size: 0.75em;'>Fumbles lost </p1></p>
 </div>
 
 </div>

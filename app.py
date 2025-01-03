@@ -4,6 +4,7 @@ from collections import defaultdict
 import backend.functions as functions
 import requests
 import asyncio
+import json
 
 
 app = Flask(__name__, template_folder = 'frontend/templates')
@@ -196,7 +197,8 @@ def display_team_info(team_id):
                 a.slug,
                 a.shortName,
                 a.athlete_id,
-                a.team_id
+                a.team_id,
+                a.player_status
             FROM depthChart d
             LEFT JOIN athletes a 
                 ON d.athlete_url = a.athlete_url
@@ -246,13 +248,13 @@ def display_player_info(team_id, slug, athlete_id):
 
         cursor.execute('SELECT athlete_id, player_name, weight, height, age, dob, headshot, jersey, position_abv, statistics_url, projections_url, player_status FROM athletes WHERE slug = ?', (slug,))
         athletes = cursor.fetchone()
-    
 
-    return render_template('player_info.html',
-                           athletes=athletes
-                           
-                           )
+        splits_url = f'https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/{athlete_id}/splits'
+        player_splits = functions.fetch_and_store_athlete(splits_url)
 
+        projections_url = f'http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2024/types/2/athletes/{athlete_id}/projections?lang=en&region=us'
+        player_projections = functions.fetch_and_store_athlete_projections(projections_url)
+    return render_template('player_info.html', athletes=athletes, splits=player_splits, projections = player_projections)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=60000)

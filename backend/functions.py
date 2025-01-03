@@ -285,6 +285,85 @@ async def fetch_and_store_player_data_async(urls, team_id):
 
 def fetch_and_store_athlete(url):
     response = requests.get(url)
+    if response.status_code == 200:
+        espn_data = response.json()
+
+        split_labels = espn_data.get('labels', [])
+        split_categories = espn_data.get('splitCategories', [])
+
+        player_splits = {}
+
+        for category in split_categories:
+            category_name = category.get('displayName')
+            for split in category.get('splits', []):
+                stat = split.get('abbreviation')
+                stats = split.get('stats', [])
+
+                if category_name not in player_splits:
+                    player_splits[category_name] = {}
+
+                if stat not in player_splits[category_name]:
+                    player_splits[category_name][stat] = {}
+
+                stat_type = "Rec" if split_labels[0].startswith("CAR") else "Rush"
+
+                seen_labels = {}
+                for idx, (label, value) in enumerate(zip(split_labels, stats)):
+                    if label in seen_labels:
+                        seen_labels[label] += 1
+                        unique_label = f"{stat_type} {label}"
+                    else:
+                        seen_labels[label] = 1
+                        unique_label = label
+                    
+                    player_splits[category_name][stat][unique_label] = value
+
+        return player_splits
+
+    return {}
+
+def fetch_and_store_athlete_projections(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        espn_data = response.json()
+        splits = espn_data.get('splits', {})
+        categories = splits.get('categories', [])
+
+        projection_splits = {}
+
+        for category in categories:
+            displayName = category.get('displayName')
+            abbreviation = category.get('abbreviation')
+            stat_projections = category.get('stats', [])
+            
+            if displayName not in projection_splits:
+                projection_splits[displayName] = {}
+
+            for stats in stat_projections:
+                projection_name = stats.get('displayName')
+                short_name = stats.get('shortDisplayName')
+                projection_abv = stats.get('abbreviation')
+                projection_desc = stats.get('description')
+                value = stats.get('value')
+                rank_display = stats.get('rankDisplayValue')
+
+                if rank_display is None or rank_display == '':
+                    continue
+
+                if value is None or value == 0.0:
+                    continue
+
+                if short_name not in projection_splits[displayName]:
+                    projection_splits[displayName][short_name] = {}
+
+                    projection_splits[displayName][short_name][projection_desc] = {
+                        projection_abv: {
+                            "value": value,
+                            "rank_display": rank_display
+                        }
+                    }
+        return projection_splits
+    return {}
 
 
 

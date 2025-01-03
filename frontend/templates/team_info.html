@@ -252,6 +252,26 @@
             font-size: 1em;
         }
 
+        table {
+        width: 100%;
+        border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        td {
+            background-color: #1a1a1a;
+        }
+        .split-category {
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 900px) {
             .content-container {
                 flex-direction: column;
@@ -284,6 +304,10 @@
             .stats {
                 max-width: 100%;
             }
+            table {
+                width: fit-content;
+                border-collapse: collapse;
+            }
         }
         .win {
         color: green;
@@ -294,10 +318,6 @@
         }
         .neutral {
             color: white;
-        }
-        table {
-            border: 1px solid #f0ad4e;
-            border-collapse: collapse;
         }
     </style>
 </head>
@@ -399,7 +419,7 @@
         </div>
 </div>
 
-<div id="players" class="content-section">
+<div id="players" class="content-section" >
     <h2>Players</h2>
     <h2>{{ teams[1] }} Depth Chart</h2>
     
@@ -415,6 +435,10 @@
                             <br>
                             <img src="{{player[6]}}"/> 
                             <div class="player-card-text">
+                                {% if player[13] == 'day-to-day' %}
+                                    <span style="color: crimson;">Q</span>
+                                {% endif %}
+                                <br>
                                 <span>{{ player[10] }}</span>
                                 <br>
                                 <span># {{ player[5]}}</span>
