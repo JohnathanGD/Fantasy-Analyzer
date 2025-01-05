@@ -370,11 +370,61 @@
 </div>
 
 <div id="stats" class="content-section active">
-    
+    <div class="content-container">
+        <div class="schedule">
+            <h2>Recent News:</h2>
+        </div>
+        <div class="stats">
+            <div class="stat-box">
+                <h1>Past performance </h1>
+            </div>
+            <div class="stat-box">
+                <h1>Stats past five games</h1>
+            </div>
+            <div class="stat-box">
+                <h1>Next Matchup look-ahead</h1>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="player_projections/stats" class="content-section">
-    <h1>Projections</h1>
+    <h1>{{year_id[0]}} Stats</h1>
+        {% if stats %}
+        {% for category, category_data in stats.items() %}
+        <div class="split-category">
+            <h2>{{ category }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stat</th>
+                        <th>Value</th>
+                        <th>Rank</th>
+                        <th>Desc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat, stat_data in category_data.items() %}
+                        {% for stat_desc, stat_values in stat_data.items() %}
+                            {% for abbr, details in stat_values.items() %}
+                            <tr>
+                                <td>{{ abbr }}</td>
+                                <td>{{ details.value }}</td>
+                                <td>{{ details.rank_display|default('N/A') }}</td>
+                                <td>{{ stat_desc }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>There are no player splits for this player...</p>
+    {% endif %}
+
+        <h1>{{year_id[0]}} Projections</h1>
         {% if projections %}
         {% for category, category_data in projections.items() %}
         <div class="split-category">

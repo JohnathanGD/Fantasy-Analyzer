@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import math
 import sqlite3
 import requests
 import json
@@ -132,6 +133,7 @@ def fetch_and_store_live_data():
         espn_data = response.json()
         events = espn_data.get('events', [])
         leagues = espn_data.get('leagues', [])
+
         
         conn = get_database()
         cursor = conn.cursor()
@@ -322,6 +324,51 @@ def fetch_and_store_athlete(url):
 
     return {}
 
+def fetch_and_store_athlete_stats(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        espn_data = response.json()
+        splits = espn_data.get('splits', {})
+        categories = splits.get('categories', [])
+
+        stat_splits = {}
+
+        for category in categories:
+            displayName = category.get('displayName')
+            abbreviation = category.get('abbreviation')
+            stat = category.get('stats', [])
+            
+            if displayName not in stat_splits:
+                stat_splits[displayName] = {}
+
+            for stats in stat:
+                stat_name = stats.get('displayName')
+                short_name = stats.get('shortDisplayName')
+                stat_abv = stats.get('abbreviation')
+                stat_desc = stats.get('description')
+                value = stats.get('value')
+                value = round(value, 2)
+                rank_display = stats.get('rankDisplayValue')
+
+                if rank_display is None or rank_display == '':
+                    continue
+
+                if value is None or value == 0.0:
+                    continue
+
+                if short_name not in stat_splits[displayName]:
+                    stat_splits[displayName][short_name] = {}
+
+                    stat_splits[displayName][short_name][stat_desc] = {
+                        stat_abv: {
+                            "value": value,
+                            "rank_display": rank_display
+                        }
+                    }
+        return stat_splits
+
+    return {}
+
 def fetch_and_store_athlete_projections(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -345,6 +392,7 @@ def fetch_and_store_athlete_projections(url):
                 projection_abv = stats.get('abbreviation')
                 projection_desc = stats.get('description')
                 value = stats.get('value')
+                value = round(value, 2)
                 rank_display = stats.get('rankDisplayValue')
 
                 if rank_display is None or rank_display == '':
@@ -531,5 +579,3 @@ def fetch_and_store_boxscore(url):
 
         conn.commit()
         conn.close()
-
-        #test

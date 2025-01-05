@@ -243,6 +243,9 @@ def display_player_info(team_id, slug, athlete_id):
     with functions.get_database() as conn:
         cursor = conn.cursor()
 
+        cursor.execute('SELECT year FROM leagueInfo')
+        year_id = cursor.fetchone()
+
         cursor.execute('SELECT team_id, team_name, abbreviation, logo FROM teams WHERE team_id = ?', (team_id,))
         teams = cursor.fetchone()
 
@@ -254,7 +257,11 @@ def display_player_info(team_id, slug, athlete_id):
 
         projections_url = f'http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2024/types/2/athletes/{athlete_id}/projections?lang=en&region=us'
         player_projections = functions.fetch_and_store_athlete_projections(projections_url)
-    return render_template('player_info.html', athletes=athletes, splits=player_splits, projections = player_projections)
+
+        stats_url = athletes[9]
+        player_stats = functions.fetch_and_store_athlete_stats(stats_url)
+
+    return render_template('player_info.html', athletes=athletes, splits=player_splits, projections = player_projections, stats = player_stats, year_id = year_id)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=60000)
